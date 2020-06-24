@@ -1,7 +1,9 @@
 package com.rrobledo.minesweeper.repositories
 
-import com.typesafe.scalalogging.LazyLogging
-import scaldi.Module
+import com.rrobledo.minesweeper.repositories.mongodb.{MongodbMineSweeperRepository, MongodbModule}
 
-class RepoModule extends Module with LazyLogging {
+import scala.concurrent.ExecutionContext
+
+class RepoModule (implicit ec: ExecutionContext) extends MongodbModule {
+  bind[MineSweeperRepository] to new MongodbMineSweeperRepository()
 }

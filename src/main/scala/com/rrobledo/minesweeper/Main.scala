@@ -11,7 +11,6 @@ import com.rrobledo.minesweeper.services.ServicesModule
 import com.rrobledo.minesweeper.utils.UtilsModule
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
-import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import scaldi.akka.AkkaInjectable
 import scaldi.{MutableInjectorAggregation, TypesafeConfigInjector}
 
@@ -19,6 +18,7 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import io.prometheus.client.hotspot.DefaultExports
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends App with LazyLogging with AkkaInjectable {
 

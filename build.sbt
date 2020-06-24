@@ -23,6 +23,7 @@ libraryDependencies ++= {
   val mockitoVersion = "2.9.0"
   val scaldiAkkaVersion = "0.5.8"
   val scalatestVersion = "3.0.4"
+  val MongodbVersion = "2.9.0"
 
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
@@ -53,9 +54,12 @@ libraryDependencies ++= {
     "com.github.cb372" %% "scalacache-guava" % "0.28.0",
     "net.logstash.logback" % "logstash-logback-encoder" % "5.2",
 
-    //// Async/Away library
+    // Async/Away library
     "org.scala-lang.modules" %% "scala-async" % "0.10.0",
-    
+
+    // Mongodb library
+    "org.mongodb.scala" %% "mongo-scala-driver" % MongodbVersion,
+
     "io.prometheus" % "simpleclient" % "0.8.0",
     "io.prometheus" % "simpleclient_common" % "0.8.0",
     "io.prometheus" % "simpleclient_hotspot" % "0.8.0",
