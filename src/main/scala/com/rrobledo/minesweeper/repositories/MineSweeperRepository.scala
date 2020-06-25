@@ -1,6 +1,6 @@
 package com.rrobledo.minesweeper.repositories
 
-import com.rrobledo.minesweeper.repositories.mongodb.collections.Game
+import com.rrobledo.minesweeper.models.game.Game
 
 import scala.concurrent.Future
 

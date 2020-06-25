@@ -18,6 +18,7 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import io.prometheus.client.hotspot.DefaultExports
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends App with LazyLogging with AkkaInjectable {
@@ -39,7 +40,6 @@ object Main extends App with LazyLogging with AkkaInjectable {
       private val port = config.getInt("http.port")
 
       implicit val system: ActorSystem = inject[ActorSystem]
-      implicit val materializer: ActorMaterializer = ActorMaterializer()
       implicit val executionContext: ExecutionContextExecutor = system.dispatcher
       implicit val timeout: Timeout = Timeout(42 seconds)
       Http().bindAndHandle(routes, host, port) map { binding => logArt(binding) } recover {

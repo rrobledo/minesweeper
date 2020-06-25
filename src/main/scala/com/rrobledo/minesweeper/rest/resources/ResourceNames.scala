@@ -5,4 +5,5 @@ object ResourceNames {
   val ApiVersion = "v1"
 
   val Health = "health"
+  val Games = "games"
 }

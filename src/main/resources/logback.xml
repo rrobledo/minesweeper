@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="false">
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>
-                {
-                    "service":"${SERVICE_NAME}",
-                    "env": "${ENVIRONMENT}",
-                    "host" : "${HOSTNAME}"
-                }
-            </customFields>
+        <encoder>
+            <pattern>%date{HH:mm:ss} %-5level %logger{0} {%class %method} - %msg%n</pattern>
         </encoder>
     </appender>
 
