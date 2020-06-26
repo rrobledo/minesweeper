@@ -1,14 +1,31 @@
 package com.rrobledo.minesweeper.rest.controllers
 
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.server._
 import com.rrobledo.minesweeper.models.health.Health
-import scala.concurrent.Future
+import com.rrobledo.minesweeper.rest.BaseController
+import com.rrobledo.minesweeper.services.health.HealthCheckService
+import com.typesafe.scalalogging.LazyLogging
+import scaldi.{Injectable, Injector}
 
-trait HealthController {
+trait HealthController
+  extends BaseController
+    with Injectable
+    with LazyLogging {
+  implicit val inj: Injector
 
-  /**
-    *
-    * @return the status of this service and optionally its dependencies
-    */
-  def check(): Future[Health]
+  private lazy val healthCheckService: HealthCheckService = inject[HealthCheckService]
 
+  def healthRoutes: Route = pathPrefix(ResourceNames.Health) {
+    pathEnd {
+      get {
+        onSuccess(healthCheckService.check()) { health : Health =>
+          health.healthy match {
+            case (true) => complete(health)
+            case (false) => complete(InternalServerError)
+          }
+        }
+      }
+    }
+  }
 }

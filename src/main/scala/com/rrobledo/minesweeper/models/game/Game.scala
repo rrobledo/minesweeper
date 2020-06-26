@@ -12,9 +12,9 @@ case class GameOptions
 
 case class Game
 (
-  _id: Int,
-  userId: Int,
-  // created: DateTime,
+  _id: String,
+  userId: String,
+  created: DateTime,
   status: String,
   options: GameOptions
 )

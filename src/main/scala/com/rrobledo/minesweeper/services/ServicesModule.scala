@@ -13,8 +13,8 @@ import scala.concurrent.ExecutionContext
 
 class ServicesModule(implicit ec: ExecutionContext) extends Module with Injectable {
 
-  bind[HealthCheckService] as 'self to new DefaultHealthCheckService()
-  bind[GameService] as 'self to new DefaultGameService()
+  bind[HealthCheckService] to new DefaultHealthCheckService()
+  bind[GameService] to new DefaultGameService()
 
   bind[Set[HealthCheckService]] as 'healthDependencies to {
     Set.empty[HealthCheckService].empty
