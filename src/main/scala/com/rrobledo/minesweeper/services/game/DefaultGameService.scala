@@ -3,7 +3,7 @@ package com.rrobledo.minesweeper.services.game
 import com.rrobledo.minesweeper.models.game.{Cell, Game}
 import com.rrobledo.minesweeper.repositories.MineSweeperRepository
 import com.typesafe.scalalogging.LazyLogging
-import org.joda.time.{DateTime, LocalDate, Seconds}
+import org.joda.time.{DateTime, Seconds}
 import scaldi.{Injectable, Injector}
 
 import scala.async.Async.{async, await}
@@ -18,34 +18,15 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
   val repository : MineSweeperRepository = inject[MineSweeperRepository]
 
   override def newGame(game: Game): Future[Game] = async {
+    // Persist Game
+    await(repository.addGame(game))
+
+    // Generate cells and persist them.
     val cells = generateCells(game._id, game.options.rows, game.options.cols, game.options.mines)
     val cellsWithNeighborCount = calculateNeighborCountMines(cells, game._id, game.options.rows, game.options.cols)
-    await(repository.addGame(game))
     await(repository.addCells(cellsWithNeighborCount))
+
     game
-  }
-
-  /**
-    * Get game
-    *
-    * @param gameId game identifier.
-    * @return a new game.
-    */
-  override def getGame(gameId: String): Future[Game] = async {
-    await(repository.getGame(gameId)) match {
-      case Some(game) => game
-      case _ => throw new ClassNotFoundException()
-    }
-  }
-
-  /**
-    * Get game cells
-    *
-    * @param gameId game identifier.
-    * @return list of cells.
-    */
-  override def getCells(gameId: String): Future[List[Cell]] = async {
-    await(repository.getCells(gameId)).toList
   }
 
   /**
@@ -66,6 +47,70 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
               }
     val cells = await(repository.getCells(gameId)).toList
 
+    // Validate time limit.
+    await(validateTimeLimit(game)) match {
+      case false => throw new ClassNotFoundException()
+      case _ => Unit
+    }
+
+    // Get cells to reveal.
+    val cellsToReveal = getCellsToReveal(game, cell, cells)
+
+    // Update cells status
+    await(Future.sequence(cellsToReveal.map( cell => {
+      repository.updateCellRevealed(cell, cell.revealed)
+    })))
+
+    // validate if game finished.
+    await(validateGameFinished(gameId, cell.isMine))
+    cellsToReveal
+  }
+
+  /**
+    * Get game
+    *
+    * @param gameId game identifier.
+    * @return a new game.
+    */
+  override def getGame(gameId: String): Future[Game] = async {
+    await(repository.getGame(gameId)) match {
+      case Some(game) => {
+        await(validateTimeLimit(game))
+        game
+      }
+      case _ => throw new ClassNotFoundException()
+    }
+  }
+
+  /**
+    * Get game cells
+    *
+    * @param gameId game identifier.
+    * @return list of cells.
+    */
+  override def getCells(gameId: String): Future[List[Cell]] = async {
+    await(repository.getCells(gameId)).toList
+  }
+
+  /**
+    * Validate time limit of playing games, in case that some game reach limit it shall be GAME_OVER_LIMIT
+    */
+  override def validateTimeLimitPlayingGaming(): Future[Unit] = async {
+    val playingGames = await(repository.getPlayingGames())
+    await(Future.sequence(playingGames.map { game =>
+      validateTimeLimit(game)
+    }))
+  }
+
+  /**
+    * Reveal cells
+    *
+    * @param game game
+    * @param cell cell
+    * @param cells cells of game
+    * @return list cell to reveal.
+    */
+  private def getCellsToReveal(game: Game, cell: Cell, cells: List[Cell]): List[Cell] = {
     val revealedCells = cell match {
       case cell if cell.isMine => {
         cells.filter(cell => !cell.revealed)
@@ -77,30 +122,23 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
         List(cell)
       }
     }
-    val cellsToReveal = revealedCells.map(cell => Cell(cell.gameId, cell.row, cell.col, cell.isMine, cell.neighborCount, true))
-    await(Future.sequence(cellsToReveal.map( cell => {
-      repository.updateCellRevealed(cell, cell.revealed)
-    })))
-
-    await(validateGameFinished(gameId, cell.isMine))
-    cellsToReveal
+    revealedCells.map(cell => Cell(cell.gameId, cell.row, cell.col, cell.isMine, cell.neighborCount, true))
   }
 
   /**
-    * Validate time limit of playing games, in case that analized game reach limit it shall be GAME_OVER_LIMIT
+    * Validate time limit for a game, in case that some game reach limit it shall be GAME_OVER_LIMIT
     */
-  override def validateTimeLimitPlayingGaming(): Future[Unit] = async {
-    val playingGames = await(repository.getPlayingGames())
-    await(Future.sequence(playingGames.map { game =>
-      val currentDate = DateTime.now()
-      Seconds.secondsBetween(game.created, currentDate).getSeconds > game.options.limitTime match {
-        case true => {
-          repository.updateGameStatus(game._id, status = "GAME_OVER_LIMIT")
-        }
-        case false => Future.successful()
+  private def validateTimeLimit(game: Game): Future[Boolean] = async {
+    val currentDate = DateTime.now()
+    Seconds.secondsBetween(game.created, currentDate).getSeconds > game.options.limitTime match {
+      case true => {
+        await(repository.updateGameStatus(game._id, status = "GAME_OVER_LIMIT"))
+        false
       }
-    }))
+      case false => true
+    }
   }
+
 
   /** Generate a list of cells to the game where the list size is (row - 1) * cols + (col - 1).
     *  @param rows rows on game board.

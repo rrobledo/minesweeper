@@ -145,14 +145,11 @@ class GameServiceTest extends FunSuiteLike
   }
 
   test("new game end time limit") {
-    val gameOptions = GameOptions(rows = 3, cols = 3, mines = 2, limitTime = 5)
+    val gameOptions = GameOptions(rows = 3, cols = 3, mines = 2, limitTime = 9)
     val game = GameCreate(userId = "raul.osvaldo.robledo@gmail.com", gameOptions).toGame()
 
     whenReady(service.newGame(game)) { game =>
       whenReady(service.revealCell(game._id, 1, 2)) { revealedCells =>
-        revealedCells.size shouldEqual 1
-      }
-      whenReady(service.revealCell(game._id, 2, 1)) { revealedCells =>
         revealedCells.size shouldEqual 1
       }
 
