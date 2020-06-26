@@ -1,13 +1,11 @@
 package com.rrobledo.minesweeper.services.game
 
-import com.rrobledo.minesweeper.models.game.{Game, GameOptions}
+import com.rrobledo.minesweeper.models.game.GameOptions
 import com.rrobledo.minesweeper.repositories.RepoModule
 import com.rrobledo.minesweeper.rest.entities.GameCreate
 import com.rrobledo.minesweeper.services.ServicesModule
 import com.rrobledo.minesweeper.utils.UtilsModule
 import com.typesafe.config.{Config, ConfigFactory}
-import org.mockito.Mockito.{verifyZeroInteractions, when}
-import scala.async.Async.{async, await}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -142,6 +140,28 @@ class GameServiceTest extends FunSuiteLike
 
       whenReady(service.getGame(game._id)) { gameStored =>
         gameStored.status shouldEqual "SUCCESS"
+      }
+    }
+  }
+
+  test("new game end time limit") {
+    val gameOptions = GameOptions(rows = 3, cols = 3, mines = 2, limitTime = 5)
+    val game = GameCreate(userId = "raul.osvaldo.robledo@gmail.com", gameOptions).toGame()
+
+    whenReady(service.newGame(game)) { game =>
+      whenReady(service.revealCell(game._id, 1, 2)) { revealedCells =>
+        revealedCells.size shouldEqual 1
+      }
+      whenReady(service.revealCell(game._id, 2, 1)) { revealedCells =>
+        revealedCells.size shouldEqual 1
+      }
+
+      Thread.sleep(10000)
+
+      whenReady(service.validateTimeLimitPlayingGaming()) { _ =>
+        whenReady(service.getGame(game._id)) { gameStored =>
+          gameStored.status shouldEqual "GAME_OVER_LIMIT"
+        }
       }
 
     }

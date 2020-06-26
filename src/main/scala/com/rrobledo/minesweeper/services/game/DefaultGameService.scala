@@ -91,13 +91,15 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
     */
   override def validateTimeLimitPlayingGaming(): Future[Unit] = async {
     val playingGames = await(repository.getPlayingGames())
-    playingGames.map { game =>
+    await(Future.sequence(playingGames.map { game =>
       val currentDate = DateTime.now()
       Seconds.secondsBetween(game.created, currentDate).getSeconds > game.options.limitTime match {
-        case true => logger.debug("game finished")
-        case false => Unit
+        case true => {
+          repository.updateGameStatus(game._id, status = "GAME_OVER_LIMIT")
+        }
+        case false => Future.successful()
       }
-    }
+    }))
   }
 
   /** Generate a list of cells to the game where the list size is (row - 1) * cols + (col - 1).
