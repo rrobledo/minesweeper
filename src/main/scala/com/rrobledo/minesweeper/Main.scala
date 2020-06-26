@@ -8,6 +8,7 @@ import com.rrobledo.minesweeper.repositories.RepoModule
 import com.rrobledo.minesweeper.rest.RestInterface
 import com.rrobledo.minesweeper.rest.controllers.ControllersModule
 import com.rrobledo.minesweeper.services.ServicesModule
+import com.rrobledo.minesweeper.services.monitoring.Monitoring
 import com.rrobledo.minesweeper.utils.UtilsModule
 import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.LazyLogging
@@ -33,6 +34,7 @@ object Main extends App with LazyLogging with AkkaInjectable {
 
   initRestAPI()
   initMetrics()
+  initMonitoring()
 
   private def initRestAPI(): Unit = {
     new RestInterface() {
@@ -54,6 +56,11 @@ object Main extends App with LazyLogging with AkkaInjectable {
 
   private def initMetrics(): Unit = {
     DefaultExports.initialize()
+  }
+
+  private def initMonitoring(): Unit = {
+    implicit val monitoring: Monitoring = inject[Monitoring]
+    monitoring.start()
   }
 
   private def logArt(binding: Http.ServerBinding): Unit = {

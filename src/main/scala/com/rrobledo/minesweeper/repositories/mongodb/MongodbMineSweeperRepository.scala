@@ -1,14 +1,12 @@
 package com.rrobledo.minesweeper.repositories.mongodb
 
 import com.rrobledo.minesweeper.models.game.{Cell, Game, GameOptions}
-import com.rrobledo.minesweeper.repositories.{JodaCodec, MineSweeperRepository, Record}
+import com.rrobledo.minesweeper.repositories.{JodaCodec, MineSweeperRepository}
 import com.typesafe.scalalogging.LazyLogging
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
-import org.joda.time.DateTime
 import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
-import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.bson.collection.immutable.Document
 import scaldi.{Injectable, Injector}
 
@@ -21,8 +19,7 @@ class MongodbMineSweeperRepository(implicit val inj: Injector, implicit val ec: 
 
   private val connector = inject[Connector]
   private val gamesCodecRegistry = fromRegistries(fromProviders(classOf[Game],
-                                          classOf[GameOptions],
-                                          classOf[Record]),
+                                          classOf[GameOptions]),
                                           CodecRegistries.fromCodecs(new JodaCodec),
                                           DEFAULT_CODEC_REGISTRY)
   private val gamesCollection = connector.getDatabase.getCollection[Game]("games").withCodecRegistry(gamesCodecRegistry)
@@ -79,5 +76,19 @@ class MongodbMineSweeperRepository(implicit val inj: Injector, implicit val ec: 
       .updateOne(Document("_id" -> gameId), Document("$set" -> Document("status" -> status)))
       .head
       .map(_ => Unit)
+  }
+
+  override def getGames(): Future[Seq[Game]] = {
+    gamesCollection
+      .find()
+      .collect()
+      .toFuture()
+  }
+
+  override def getPlayingGames(): Future[Seq[Game]] = {
+    gamesCollection
+      .find(Document("status" -> "PLAYING"))
+      .collect()
+      .toFuture()
   }
 }

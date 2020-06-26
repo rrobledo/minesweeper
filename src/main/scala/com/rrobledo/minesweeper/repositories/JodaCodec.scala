@@ -10,4 +10,3 @@ class JodaCodec extends Codec[DateTime] {
   override def getEncoderClass: Class[DateTime] = classOf[DateTime]
 }
 
-case class Record(id: String, created: DateTime)

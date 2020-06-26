@@ -3,6 +3,7 @@ package com.rrobledo.minesweeper.services.game
 import com.rrobledo.minesweeper.models.game.{Cell, Game}
 import com.rrobledo.minesweeper.repositories.MineSweeperRepository
 import com.typesafe.scalalogging.LazyLogging
+import org.joda.time.{DateTime, LocalDate, Seconds}
 import scaldi.{Injectable, Injector}
 
 import scala.async.Async.{async, await}
@@ -83,6 +84,20 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
 
     await(validateGameFinished(gameId, cell.isMine))
     cellsToReveal
+  }
+
+  /**
+    * Validate time limit of playing games, in case that analized game reach limit it shall be GAME_OVER_LIMIT
+    */
+  override def validateTimeLimitPlayingGaming(): Future[Unit] = async {
+    val playingGames = await(repository.getPlayingGames())
+    playingGames.map { game =>
+      val currentDate = DateTime.now()
+      Seconds.secondsBetween(game.created, currentDate).getSeconds > game.options.limitTime match {
+        case true => logger.debug("game finished")
+        case false => Unit
+      }
+    }
   }
 
   /** Generate a list of cells to the game where the list size is (row - 1) * cols + (col - 1).

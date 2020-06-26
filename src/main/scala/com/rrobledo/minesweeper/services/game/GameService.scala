@@ -36,4 +36,9 @@ trait GameService {
     */
   def revealCell(gameId: String, row: Int, col: Int): Future[List[Cell]]
 
+  /**
+    * Validate time limit of playing games, in case that analized game reach limit it shall be GAME_OVER_LIMIT
+    */
+  def validateTimeLimitPlayingGaming(): Future[Unit]
+
 }
