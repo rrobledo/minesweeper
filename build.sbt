@@ -1,4 +1,4 @@
-enablePlugins(JavaAppPackaging)
+//enablePlugins(JavaAppPackaging)
 enablePlugins(UniversalPlugin)
 
 name := "minesweeper"
