@@ -78,9 +78,9 @@ class MongodbMineSweeperRepository(implicit val inj: Injector, implicit val ec: 
       .map(_ => Unit)
   }
 
-  override def getGames(): Future[Seq[Game]] = {
+  override def getGamesByUser(userId: String): Future[Seq[Game]] = {
     gamesCollection
-      .find()
+      .find(Document("userId" -> userId))
       .collect()
       .toFuture()
   }

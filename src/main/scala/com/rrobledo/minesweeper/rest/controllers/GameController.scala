@@ -19,14 +19,32 @@ trait GameController
   private lazy val gameService: GameService = inject[GameService]
 
   def gameRoutes: Route = pathPrefix(ResourceNames.Games) {
-    (post & pathEndOrSingleSlash) {
-      (entity(as[GameCreate])) { game =>
-        onSuccess(gameService.newGame(game.toGame())) { game : Game =>
-          respondWithHeader(Location(s"${ResourceNames.ApiPrefix}/${ResourceNames.Games}/${game._id}")) {
-            complete(StatusCodes.Created, game)
+    headerValueByName("X-User-Id") { userId => {
+      post {
+        pathEnd {
+          entity(as[GameCreate]) { game =>
+            onSuccess(gameService.newGame(game.toGame(userId))) { game: Game =>
+              respondWithHeader(Location(s"${ResourceNames.ApiPrefix}/${ResourceNames.Games}/${game._id}")) {
+                complete(StatusCodes.Created, game)
+              }
+            }
+          }
+        }
+      } ~
+      get {
+        pathEnd {
+          onSuccess(gameService.getGamesByUserId(userId)) { games: List[Game] =>
+            complete(StatusCodes.Accepted, games)
+          }
+        } ~
+        path(Segment) { gameId =>
+          pathEnd {
+            onSuccess(gameService.getGame(gameId)) { game =>
+              complete(StatusCodes.Accepted, game)
+            }
           }
         }
       }
-    }
+    }}
   }
 }

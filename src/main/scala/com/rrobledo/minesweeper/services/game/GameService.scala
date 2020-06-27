@@ -21,11 +21,27 @@ trait GameService {
   def getGame(gameId: String): Future[Game]
 
   /**
+    * Get user's game
+    * @param userId userId.
+    * @return list of games.
+    */
+  def getGamesByUserId(userId: String): Future[List[Game]]
+
+  /**
     * Get game cells
     * @param gameId game identifier.
     * @return list of cells.
     */
   def getCells(gameId: String): Future[List[Cell]]
+
+  /**
+    * Get game cell
+    * @param gameId game identifier.
+    * @param row row.
+    * @param col col.
+    * @return cell.
+    */
+  def getCell(gameId: String, row: Int, col: Int): Future[Option[Cell]]
 
   /**
     * Reveal cells to a game

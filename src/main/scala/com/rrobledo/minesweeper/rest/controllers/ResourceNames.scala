@@ -7,4 +7,8 @@ object ResourceNames {
 
   val Health = "health"
   val Games = "games"
+  val Cells = "cells"
+  val Rows = "rows"
+  val Cols = "cols"
+  val Reveal = "reveal"
 }

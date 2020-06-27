@@ -1,7 +1,7 @@
 package com.rrobledo.minesweeper.rest
 
 import akka.http.scaladsl.server._
-import com.rrobledo.minesweeper.rest.controllers.{GameController, HealthController}
+import com.rrobledo.minesweeper.rest.controllers.{CellController, GameController, HealthController}
 import com.rrobledo.minesweeper.rest.controllers.ResourceNames.{Api, ApiVersion}
 import scaldi.{Injectable, Injector}
 
@@ -13,7 +13,8 @@ abstract class RestInterface(implicit val inj: Injector)
     encodeResponse {
       pathPrefix(Api / ApiVersion) {
         healthRoutes ~
-        gameRoutes
+        gameRoutes ~
+        cellRoutes
       }
     }
 }
@@ -21,3 +22,4 @@ abstract class RestInterface(implicit val inj: Injector)
 trait Resources
   extends HealthController
      with GameController
+     with CellController

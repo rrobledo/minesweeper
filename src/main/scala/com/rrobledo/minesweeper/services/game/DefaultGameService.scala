@@ -83,6 +83,16 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
   }
 
   /**
+    * Get user's game
+    *
+    * @param userId userId.
+    * @return list of games.
+    */
+  override def getGamesByUserId(userId: String): Future[List[Game]] = async {
+    await(repository.getGamesByUser(userId)).toList
+  }
+
+  /**
     * Get game cells
     *
     * @param gameId game identifier.
@@ -90,6 +100,18 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
     */
   override def getCells(gameId: String): Future[List[Cell]] = async {
     await(repository.getCells(gameId)).toList
+  }
+
+  /**
+    * Get game cell
+    *
+    * @param gameId game identifier.
+    * @param row    row.
+    * @param col    col.
+    * @return cell.
+    */
+  override def getCell(gameId: String, row: Int, col: Int): Future[Option[Cell]] = async {
+    await(repository.getCellByGameRowCol(gameId, row, col))
   }
 
   /**
@@ -291,5 +313,4 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
       }
     }
   }
-
 }
