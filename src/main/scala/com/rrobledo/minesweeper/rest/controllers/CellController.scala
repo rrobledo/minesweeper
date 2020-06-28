@@ -58,4 +58,7 @@ trait CellController
       }}
     }}
   }
+
+  def getCellRoutes(): Route = corsHandler(cellRoutes)
+
 }

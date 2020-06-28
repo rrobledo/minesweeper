@@ -47,4 +47,7 @@ trait GameController
       }
     }}
   }
+
+  def getGamesRoutes(): Route = corsHandler(gameRoutes)
+
 }

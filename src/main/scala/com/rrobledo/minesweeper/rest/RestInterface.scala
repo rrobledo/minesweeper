@@ -12,9 +12,9 @@ abstract class RestInterface(implicit val inj: Injector)
   val routes: Route =
     encodeResponse {
       pathPrefix(Api / ApiVersion) {
-        healthRoutes ~
-        gameRoutes ~
-        cellRoutes
+        getHealthRoutes() ~
+        getGamesRoutes() ~
+        getCellRoutes()
       }
     }
 }

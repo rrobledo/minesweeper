@@ -28,4 +28,7 @@ trait HealthController
       }
     }
   }
+
+  def getHealthRoutes(): Route = corsHandler(healthRoutes)
+
 }
