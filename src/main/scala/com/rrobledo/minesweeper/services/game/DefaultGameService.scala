@@ -47,14 +47,8 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
               }
     val cells = await(repository.getCells(gameId)).toList
 
-    // Validate time limit.
-    await(validateTimeLimit(game)) match {
-      case false => throw new ClassNotFoundException()
-      case _ => Unit
-    }
-
     // Get cells to reveal.
-    val cellsToReveal = getCellsToReveal(game, cell, cells)
+    val cellsToReveal = await(getCellsToReveal(game, cell, cells))
 
     // Update cells status
     await(Future.sequence(cellsToReveal.map( cell => {
@@ -132,7 +126,7 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
     * @param cells cells of game
     * @return list cell to reveal.
     */
-  private def getCellsToReveal(game: Game, cell: Cell, cells: List[Cell]): List[Cell] = {
+  private def getCellsToReveal(game: Game, cell: Cell, cells: List[Cell]): Future[List[Cell]] = async {
     val revealedCells = cell match {
       case cell if cell.isMine => {
         cells.filter(cell => !cell.revealed)
@@ -141,7 +135,10 @@ class DefaultGameService(implicit val inj: Injector, implicit val ec: ExecutionC
         getNeighborCellsToReveal(cell, game.options.rows, game.options.cols, cells, List.empty )
       }
       case _ => {
-        List(cell)
+        await(validateTimeLimit(game)) match {
+          case false => cells.filter(cell => !cell.revealed)
+          case _ => List(cell)
+        }
       }
     }
     revealedCells.map(cell => Cell(cell.gameId, cell.row, cell.col, cell.isMine, cell.neighborCount, true))

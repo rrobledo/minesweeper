@@ -1,8 +1,7 @@
 package com.rrobledo.minesweeper
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ActorSystem}
 import akka.http.scaladsl.Http
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.rrobledo.minesweeper.repositories.RepoModule
 import com.rrobledo.minesweeper.rest.RestInterface
@@ -41,8 +40,9 @@ object Main extends App with LazyLogging with AkkaInjectable {
       private val host = config.getString("http.host")
       private val port = config.getInt("http.port")
 
-      implicit val system: ActorSystem = inject[ActorSystem]
+      implicit val system: ActorSystem = ActorSystem("minesweeper")
       implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
       implicit val timeout: Timeout = Timeout(42 seconds)
       Http().bindAndHandle(routes, host, port) map { binding => logArt(binding) } recover {
         case ex =>

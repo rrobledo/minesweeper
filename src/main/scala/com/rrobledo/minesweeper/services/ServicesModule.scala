@@ -7,9 +7,6 @@ import com.rrobledo.minesweeper.services.monitoring.Monitoring
 import scaldi.{Injectable, Module}
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.fromExecutor
-import scala.concurrent.forkjoin.ForkJoinPool
-import scala.concurrent.ExecutionContext
 
 class ServicesModule(implicit ec: ExecutionContext) extends Module with Injectable {
 
@@ -20,10 +17,4 @@ class ServicesModule(implicit ec: ExecutionContext) extends Module with Injectab
   bind[Set[HealthCheckService]] as 'healthDependencies to {
     Set.empty[HealthCheckService].empty
   }
-
-  bind[ExecutionContext] as 'httpResolver to {
-    fromExecutor(new ForkJoinPool(sys.runtime.availableProcessors()))
-  }
-
-  bind[ActorSystem] to ActorSystem("minesweeper")
 }
