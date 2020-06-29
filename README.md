@@ -11,10 +11,22 @@
                                               |_|          
 ~~~
 
-# Running 
+# Architecture Specifications and Notes
+
+  - **Web Server:** It is implemented on scala using akka http framework. It implements a rest api. 
+    You can find the specification on https://stoplight.io/p/docs/gh/rrobledo/minesweeper, It is
+     documented using swagger (https://github.com/rrobledo/minesweeper/blob/master/docs/api.yaml) 
+  - **Persistence:** It is over mongodb database, and the service is using the scala mongodb driver.
+  - **Client Library:** A javascript client library has been implemented in order to be integrated with your html5 UI.
+    (https://github.com/rrobledo/minesweeper/blob/master/client/lib/minesweeper.js) 
+  - **User Interface:** A web page for testing the application has been implemented and deployed on 
+    http://44.231.173.225
+    
+# Running
 
 1. Starting Docker compose and dependencies
     ```
+    cd /compose
     docker-compose up -d
     ```
 
@@ -32,3 +44,4 @@
     ```
     sbt coverageReport
     ```
+

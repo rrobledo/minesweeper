@@ -35,7 +35,7 @@ class GameControllerTest
       TypesafeConfigInjector(config)
 
   val routes = Route.seal(new RestInterface() {
-    implicit val system: ActorSystem = inject[ActorSystem]
+    implicit val system: ActorSystem = ActorSystem("minesweeper")
     implicit val executionContext: ExecutionContextExecutor = system.dispatcher
   }.routes)
 
