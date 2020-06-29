@@ -1,0 +1,262 @@
+openapi: 3.0.1
+info:
+  title: Minesweeper Rest API
+  description: |
+    This Document describe the rest api of minesweeper game service.
+
+  contact:
+    email: raul.osvaldo.robledo@gmail.com
+  version: 1.0.0
+servers:
+  - url: 'http://44.231.173.225:8888/api/v1'
+tags:
+  - name: Games
+    description: Game Management
+paths:
+  /games:
+    post:
+      tags:
+        - Games
+      summary: Create a new game
+      parameters:
+        - name: X-User-Id
+          in: header
+          description: User is playing
+          required: true
+          schema:
+            type: string
+          examples:
+            example:
+              value:
+                raul.osvaldo.robledo@gmail.com
+      requestBody:
+        description: Game Options
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreate'
+            examples:
+              example:
+                value:
+                  options:
+                    rows: 20
+                    cols: 20
+                    mines: 15
+                    limitTime: 600
+      responses:
+        '201':
+          description: game created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Invalid input
+          content: {}
+    get:
+      tags:
+        - Games
+      summary: Get all games for current user
+      parameters:
+        - name: X-User-Id
+          in: header
+          description: User is playing
+          required: true
+          schema:
+            type: string
+          examples:
+            example:
+              value:
+                raul.osvaldo.robledo@gmail.com
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                description: 'games'
+                items:
+                  $ref: '#/components/schemas/Game'
+
+  /games/{game_id}:
+    get:
+      tags:
+        - Games
+      summary: Get game information
+      parameters:
+        - name: X-User-Id
+          in: header
+          description: User is playing
+          required: true
+          schema:
+            type: string
+          examples:
+            example:
+              value:
+                raul.osvaldo.robledo@gmail.com
+        - name: game_id
+          in: path
+          description: Game id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+
+  /games/{game_id}/cells:
+    get:
+      tags:
+        - Games
+      summary: Get game information
+      parameters:
+        - name: X-User-Id
+          in: header
+          description: User is playing
+          required: true
+          schema:
+            type: string
+          examples:
+            example:
+              value:
+                raul.osvaldo.robledo@gmail.com
+        - name: game_id
+          in: path
+          description: Game id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                description: 'cells'
+                items:
+                  $ref: '#/components/schemas/Cell'
+  /games/{game_id}/cells/rows/{row}/cols/{col}/reveal:
+    get:
+      tags:
+        - Games
+      summary: Reveal a cell's content
+      parameters:
+        - name: X-User-Id
+          in: header
+          description: User is playing
+          required: true
+          schema:
+            type: string
+          examples:
+            example:
+              value:
+                raul.osvaldo.robledo@gmail.com
+        - name: game_id
+          in: path
+          description: Game id
+          required: true
+          schema:
+            type: integer
+        - name: row
+          in: path
+          description: row number
+          required: true
+          schema:
+            type: integer
+        - name: col
+          in: path
+          description: col number
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                description: 'revealed cells'
+                items:
+                  $ref: '#/components/schemas/Cell'
+
+components:
+  schemas:
+    GameOptions:
+      type: object
+      properties:
+        rows:
+          type: number
+          description: Rows number of game
+          example: 5
+        cols:
+          type: number
+          description: Cols number of game
+          example: 5
+        mines:
+          type: number
+          description: Mines number of game
+          example: 3
+        limitTime:
+          type: number
+          description: Time limit (on seconds) to complete the game.
+          example: 90
+    GameCreate:
+      type: object
+      properties:
+        options:
+          $ref: '#/components/schemas/GameOptions'
+    Game:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: game identifier
+          example: e65bd040-06da-4445-8f22-ae2dc5e751535
+        userId:
+          type: string
+          description: user email
+          example: raul.osvaldo.robledo@gmail.com
+        created:
+          type: string
+          description: Date when game was created
+          example: 2020-06-28T20:05:35-03:00
+        status:
+          type: string
+          description: status of game. (PLAYING, GAME_OVER_MINE_FOUND, GAME_OVER_LIMIT)
+          example: PLAYING
+        options:
+          $ref: '#/components/schemas/GameOptions'
+    Cell:
+      type: object
+      properties:
+        gameId  :
+          type: string
+          description: game identifier
+          example: e65bd040-06da-4445-8f22-ae2dc5e751535
+        row:
+          type: number
+          description: Row number
+          example: 5
+        col:
+          type: number
+          description: Col number
+          example: 5
+        neighborCount:
+          type: number
+          description: Neighbor mines count
+          example: 2
+        revealed:
+          type: boolean
+          description: Reveled
+          example: false
+        isMine:
+          type: boolean
+          description: Is Mine
+          example: false

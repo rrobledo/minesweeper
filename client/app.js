@@ -62,7 +62,7 @@ function mousePressed() {
                     }
                     game.getInfo().then( info => {
                         if (info.status == 'GAME_OVER_MINE_FOUND') {
-                            alert("GAME OVER, mine discovered.")
+                            alert("GAME OVER, mine found.")
                         }
                     })
                 })
